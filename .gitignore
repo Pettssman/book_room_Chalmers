@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 /grupprum_executable.py
+/run_grupprum.bat
 # C extensions
 *.so
 
