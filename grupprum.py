@@ -11,11 +11,26 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.action_chains import ActionChains
 from cryptography.fernet import Fernet
 
+# Decrypt password using pycreds and Fernet
 passw = pycreds.find_password("Fernet")
 fernet = Fernet(passw.encode('ASCII'))
 
 class Boka_Grupprum:
+    """
+    A class that represents the Boka Grupprum application.
+
+    This class contains functions that automate the booking process of study rooms in the Boka Grupprum application.
+    It uses Selenium webdriver to interact with the website.
+    """
+
     def __init__(self, preferences: list(), schedule: dict(), users: list):
+        """
+        Initialize the Boka_Grupprum class.
+
+        :param preferences: A list of preferences for the booking process.
+        :param schedule: A dictionary that represents the weekly schedule.
+        :param users: A list of users who can make bookings.
+        """
         self.preferences = preferences
         self.schedule = schedule
         self.users = users
@@ -33,19 +48,19 @@ class Boka_Grupprum:
                 3:[],       # Thursday
                 4:[]}}      # Friday
         self.week = 1
-        self.switch_user = False
-        self.weekday = date.weekday(date.today())        # Get current day, returns a number between 0 and 6
+        self.weekday = date.weekday(date.today())  # Get current day, returns a number between 0 and 6
         self.main()
         
     def main(self):
-        self.booked_list_function()                      # When this is finished, self.booked_dict is updated with all current bookings
+        """Main function that runs the booking process"""
+        self.booked_list_function() # When this is finished, self.booked_dict is updated with all current bookings
         
         while True:                 # Main loop
             self.day_change()       # Change day
             self.book_room()        # Book room
     
     def booked_list_function(self):
-        """Returns a list with all booked rooms from both accounts"""
+        """Generates a list with all booked rooms from all users"""
 
         for user in self.users:
             self.login(user)
@@ -62,7 +77,7 @@ class Boka_Grupprum:
         self.login(self.users.pop())
 
     def login(self, user):
-        """Login to account"""
+        """Login to user"""
         PATH = "C:\Program Files (x86)\chromedriver.exe"
         self.driver = webdriver.Chrome(PATH)
         self.driver.set_window_position(-10000, 0)                  # Comment this line to show chrome window
@@ -89,6 +104,10 @@ class Boka_Grupprum:
                 time.sleep(1)
                 WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#leftresdateinc"))).click()
                 self.weekday = 0
+                if self.week == 2:           # TODO This needs a fix
+                    self.driver.close()
+                    self.driver.quit()  
+                    exit()
                 self.week = 2
             case 5:
                 time.sleep(3)
@@ -115,12 +134,10 @@ class Boka_Grupprum:
 
         for slot in slots_to_book:
             time.sleep(1)
-            self.update_booked_dict()
+            if self.user_fully_booked(): # If user fully booked, switch user and break
+                break
             if self.already_booked(slot):
                 continue
-            if self.switch_user:
-                self.switch_user = False
-                break
 
             for preference in self.preferences:
                 self.driver.find_element(By.ID, "SFC_D_0_0").clear()
@@ -131,8 +148,13 @@ class Boka_Grupprum:
                 self.actions.perform()
                 time.sleep(0.5)
                 self.book_specific_room(slot)
-                self.update_booked_dict()
-                if self.already_booked(slot) or self.switch_user:
+
+                if self.check_if_room_booked(): # If room booked, continue with next preference, else break
+                    self.driver.find_element(By.CSS_SELECTOR, "#newResTimeDiv > div.leftreserve > a").click()
+                else:
+                    self.driver.find_element(By.CSS_SELECTOR, "#newResTimeDiv > div.leftreserve > a").click()
+                    time.sleep(0.5)
+                    self.update_booked_dict()
                     break
 
     def check_if_room_booked(self):
@@ -144,6 +166,7 @@ class Boka_Grupprum:
             return False
 
     def book_specific_room(self, slot):
+        """Try to book specific room at given time slot"""
         time.sleep(0.5)
         self.actions.send_keys(Keys.RETURN)
         self.actions.perform()
@@ -175,13 +198,7 @@ class Boka_Grupprum:
         time.sleep(0.5)
         WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#info0 > div.infoboxtitle"))).click()
         self.driver.find_element(By.CSS_SELECTOR, "#continueRes2").click()
-        # Next room
-        time.sleep(0.5)
-        if self.check_if_room_booked():
-            self.driver.find_element(By.CSS_SELECTOR, "#newResTimeDiv > div.leftreserve > a").click()
-        else:
-            self.driver.find_element(By.CSS_SELECTOR, "#newResTimeDiv > div.leftreserve > a").click()
-            time.sleep(0.5)
+        time.sleep(0.5) 
 
     def already_booked(self, slot):
         """Check if slot already booked by user"""
@@ -193,19 +210,23 @@ class Boka_Grupprum:
         return False
 
     def update_booked_dict(self):
-        """Updates dicitonary containing all of the slots that are currently booked.
-        If all slots booked, exit or switch user"""
+        """Updates dicitonary containing all of the slots that are currently booked by all users"""
 
         self.booked_list = WebDriverWait(self.driver, 20).until(EC.presence_of_all_elements_located((By.XPATH, "//*[@id='myreservationslist']/table/tbody/tr")))
         del self.booked_list[:2]
 
         for booked in self.booked_list: 
                 day, clock, week = self.date_to_weekday(booked.text.strip())
-                if clock not in self.booked_dict.get(week).get(day): #(self.booked_dict.get(1).get(day) or self.booked_dict.get(2).get(day)):
+                if clock not in self.booked_dict.get(week).get(day):
                     self.booked_dict.get(week).get(day).append(clock)
 
+    def user_fully_booked(self):
+        """Check if user has max amounts of rooms booked and either switches user or quits"""
+        self.booked_list = WebDriverWait(self.driver, 20).until(EC.presence_of_all_elements_located((By.XPATH, "//*[@id='myreservationslist']/table/tbody/tr")))
+        del self.booked_list[:2]
+
         if len(self.booked_list) == 4:
-            if self.users == []:
+            if self.users == []: 
                 self.driver.close()
                 self.driver.quit()
                 exit()
@@ -213,14 +234,15 @@ class Boka_Grupprum:
                 self.logout()
                 self.login(self.users.pop())
                 self.weekday = date.weekday(date.today())
-                self.switch_user = True
                 self.day_change()
 
-
+    def logout(self):
+        """Logout from account"""
+        self.driver.close()
 
     @staticmethod
     def date_to_weekday(date_string):
-        """Returns weekday, time and week from date"""
+        """Returns weekday, time and week from date_string"""
         booking_day = date_string[0:10]
         datum = datetime.strptime(booking_day, '%Y-%m-%d').date()
         day = datum.weekday()
@@ -239,9 +261,6 @@ class Boka_Grupprum:
 
         return day, time, week
     
-    def logout(self):
-        """Logout from account"""
-        self.driver.close()
 
     # Send mail if not bookable, Not implemented
     def send_mail():
