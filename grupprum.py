@@ -80,7 +80,7 @@ class Boka_Grupprum:
         """Login to user"""
         PATH = "C:\Program Files (x86)\chromedriver.exe"
         self.driver = webdriver.Chrome(PATH)
-        self.driver.set_window_position(-10000, 0)                  # Comment this line to show chrome window
+        #self.driver.set_window_position(-10000, 0)                  # Comment this line to show chrome window
         self.driver.get("https://cloud.timeedit.net/chalmers/web/")    
         self.driver.find_element(By.CSS_SELECTOR, ".items:nth-child(4)").click()
         self.driver.find_element(By.LINK_TEXT, "Klicka här för att logga in / Please click here to log in").click()
@@ -134,11 +134,10 @@ class Boka_Grupprum:
 
         for slot in slots_to_book:
             time.sleep(1)
-            if self.user_fully_booked(): # If user fully booked, switch user and break
-                break
+            self.check_if_user_fully_booked() # If user fully booked, switch user
             if self.already_booked(slot):
                 continue
-
+            
             for preference in self.preferences:
                 self.driver.find_element(By.ID, "SFC_D_0_0").clear()
                 self.driver.find_element(By.ID, "SFC_D_0_0").send_keys(preference)
@@ -220,7 +219,7 @@ class Boka_Grupprum:
                 if clock not in self.booked_dict.get(week).get(day):
                     self.booked_dict.get(week).get(day).append(clock)
 
-    def user_fully_booked(self):
+    def check_if_user_fully_booked(self):
         """Check if user has max amounts of rooms booked and either switches user or quits"""
         self.booked_list = WebDriverWait(self.driver, 20).until(EC.presence_of_all_elements_located((By.XPATH, "//*[@id='myreservationslist']/table/tbody/tr")))
         del self.booked_list[:2]
@@ -235,6 +234,7 @@ class Boka_Grupprum:
                 self.login(self.users.pop())
                 self.weekday = date.weekday(date.today())
                 self.day_change()
+                self.check_if_user_fully_booked() # Run again to check next user
 
     def logout(self):
         """Logout from account"""
