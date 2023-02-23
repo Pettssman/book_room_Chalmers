@@ -91,6 +91,7 @@ class Boka_Grupprum:
         self.driver.find_element(By.CSS_SELECTOR, "#ffsetx186 .objectinputsearchbutton").click()
         self.actions = ActionChains(self.driver)
         self.name = user[0]
+        self.week = 1
 
     def day_change(self):
         """Changes the day on time edit, if weekend, change to monday"""
@@ -134,7 +135,8 @@ class Boka_Grupprum:
 
         for slot in slots_to_book:
             time.sleep(1)
-            self.check_if_user_fully_booked() # If user fully booked, switch user
+            if self.user_fully_booked(): # If user fully booked, switch user and NEW: break
+                break
             if self.already_booked(slot):
                 continue
             
@@ -219,7 +221,7 @@ class Boka_Grupprum:
                 if clock not in self.booked_dict.get(week).get(day):
                     self.booked_dict.get(week).get(day).append(clock)
 
-    def check_if_user_fully_booked(self):
+    def user_fully_booked(self):
         """Check if user has max amounts of rooms booked and either switches user or quits"""
         self.booked_list = WebDriverWait(self.driver, 20).until(EC.presence_of_all_elements_located((By.XPATH, "//*[@id='myreservationslist']/table/tbody/tr")))
         del self.booked_list[:2]
@@ -233,8 +235,8 @@ class Boka_Grupprum:
                 self.logout()
                 self.login(self.users.pop())
                 self.weekday = date.weekday(date.today())
-                self.day_change()
-                self.check_if_user_fully_booked() # Run again to check next user
+                self.user_fully_booked() # Run again until user with slots left fount
+                return True
 
     def logout(self):
         """Logout from account"""
