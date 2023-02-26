@@ -46,6 +46,12 @@ class Boka_Grupprum:
                 1:[],       # Tuesday
                 2:[],       # Wednesday
                 3:[],       # Thursday
+                4:[]},      # Friday
+            3:              # Week 3
+                {0:[],      # Monday
+                1:[],       # Tuesday
+                2:[],       # Wednesday
+                3:[],       # Thursday
                 4:[]}}      # Friday
         self.week = 1
         self.weekday = date.weekday(date.today())  # Get current day, returns a number between 0 and 6
@@ -104,24 +110,24 @@ class Boka_Grupprum:
                 WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#leftresdateinc"))).click()
                 time.sleep(1)
                 WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#leftresdateinc"))).click()
-                self.weekday = 0
-                if self.week == 2:           # TODO This needs a fix
+                if self.week == 3:    
                     self.driver.close()
                     self.driver.quit()  
                     exit()
-                self.week = 2
+                self.weekday = 0
+                self.week = self.week + 1
             case 5:
                 time.sleep(3)
                 WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#leftresdateinc"))).click()
                 time.sleep(1)
                 WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#leftresdateinc"))).click()
                 self.weekday = 0
-                self.week = 2
+                self.week = self.week + 1
             case 6:
                 time.sleep(3)
                 WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#leftresdateinc"))).click()
                 self.weekday = 0
-                self.week = 2
+                self.week = self.week + 1
             case _:
                 time.sleep(3)
                 WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#leftresdateinc"))).click()
@@ -258,8 +264,10 @@ class Boka_Grupprum:
         week_date = datum.isocalendar()[1]
         if week_today == week_date:
             week = 1
-        else:
+        elif week_today + 1 == week_date:
             week = 2
+        else:
+            week = 3
 
         return day, time, week
     
