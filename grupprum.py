@@ -8,8 +8,15 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.alert import Alert
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
 from cryptography.fernet import Fernet
+import chromedriver_autoinstaller
+
+
+chromedriver_autoinstaller.install()
 
 # Decrypt password using pycreds and Fernet
 passw = pycreds.find_password("Fernet")
@@ -85,7 +92,11 @@ class Boka_Grupprum:
     def login(self, user):
         """Login to user"""
         PATH = "C:\Program Files (x86)\chromedriver.exe"
-        self.driver = webdriver.Chrome(PATH)
+        options = Options()
+        options.add_argument("--disable-notifications")
+
+        self.driver = webdriver.Chrome()
+        self.alert = Alert(self.driver)
         #self.driver.set_window_position(-10000, 0)                  # Comment this line to show chrome window
         self.driver.get("https://cloud.timeedit.net/chalmers/web/")    
         self.driver.find_element(By.CSS_SELECTOR, ".items:nth-child(4)").click()
@@ -166,6 +177,17 @@ class Boka_Grupprum:
 
     def check_if_room_booked(self):
         """Check if specific room is booked by someone else"""
+        try:
+            WebDriverWait(self.driver, 0.5).until(EC.alert_is_present(),
+                                        'Timed out waiting for PA creation ' +
+                                        'confirmation popup to appear.')
+
+            self.alert = self.driver.switch_to.alert
+            self.alert.accept()
+            print("alert accepted")
+        except TimeoutException:
+            print("no alert")
+
 
         if "Bokningen kunde ej genomföras." in self.driver.page_source:
             return True
