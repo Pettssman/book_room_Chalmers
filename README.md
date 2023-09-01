@@ -1,4 +1,4 @@
-# book-room-Chalmers
+# book_room_Chalmers
 Script that books specified rooms at a wanted time given an user, e.g. room 1215B at 10:00 to 13:00
 
 This script needs your Chalmers login information to be used since to book a room, you need to be logged in. To not have your username and password in plain code, some security measurements have been implemented such that the passwords are encrypted with a key that is saved in windows credentials. Someone with enough knowledge could potentially get the key from the credential manager but it requires more work than if it was in plain text in the code.
