@@ -1,5 +1,5 @@
 # book-room-Chalmers
-Script that books specified rooms at a wanted time given an user, e.g. room 1206A at 10:00 to 13:00
+Script that books specified rooms at a wanted time given an user, e.g. room 1215B at 10:00 to 13:00
 
 
 # Step 1: Generate key
