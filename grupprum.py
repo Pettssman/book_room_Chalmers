@@ -1,4 +1,5 @@
 import time
+
 import pycreds
 from calendar import weekday
 from datetime import date, datetime
@@ -7,16 +8,12 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import Select
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.alert import Alert
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
 from cryptography.fernet import Fernet
-import chromedriver_autoinstaller
-
-
-chromedriver_autoinstaller.install()
 
 # Decrypt password using pycreds and Fernet
 passw = pycreds.find_password("Fernet")
@@ -91,13 +88,13 @@ class Boka_Grupprum:
 
     def login(self, user):
         """Login to user"""
-        PATH = "C:\Program Files (x86)\chromedriver.exe"
         options = Options()
         options.add_argument("--disable-notifications")
+        service = Service()
 
-        self.driver = webdriver.Chrome()
+        self.driver = webdriver.Chrome(service=service, options=options)
         self.alert = Alert(self.driver)
-        #self.driver.set_window_position(-10000, 0)                  # Comment this line to show chrome window
+        self.driver.set_window_position(-10000, 0)                  # Comment this line to show chrome window
         self.driver.get("https://cloud.timeedit.net/chalmers/web/")    
         self.driver.find_element(By.CSS_SELECTOR, ".items:nth-child(4)").click()
         self.driver.find_element(By.LINK_TEXT, "Klicka här för att logga in / Please click here to log in").click()
