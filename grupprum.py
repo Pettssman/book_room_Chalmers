@@ -75,7 +75,7 @@ class Boka_Grupprum:
         for user in self.users:
             self.login(user)
             time.sleep(1)
-            self.booked_list = WebDriverWait(self.driver, 20).until(EC.presence_of_all_elements_located((By.XPATH, "//*[@id='myreservationslist']/table/tbody/tr")))
+            self.booked_list = WebDriverWait(self.driver, 20).until(EC.presence_of_all_elements_located((By.XPATH, "//*[@id='myreservationslist']/table/tbody/tr")))[:-1]
             del self.booked_list[:2]
 
             for booked in self.booked_list:
@@ -94,7 +94,7 @@ class Boka_Grupprum:
 
         self.driver = webdriver.Chrome(service=service, options=options)
         self.alert = Alert(self.driver)
-        self.driver.set_window_position(-10000, 0)                  # Comment this line to show chrome window
+        # self.driver.set_window_position(-10000, 0)                  # Comment this line to show chrome window
         self.driver.get("https://cloud.timeedit.net/chalmers/web/")    
         self.driver.find_element(By.CSS_SELECTOR, ".items:nth-child(4)").click()
         self.driver.find_element(By.LINK_TEXT, "Klicka här för att logga in / Please click here to log in").click()
@@ -238,7 +238,7 @@ class Boka_Grupprum:
     def update_booked_dict(self):
         """Updates dicitonary containing all of the slots that are currently booked by all users"""
 
-        self.booked_list = WebDriverWait(self.driver, 20).until(EC.presence_of_all_elements_located((By.XPATH, "//*[@id='myreservationslist']/table/tbody/tr")))
+        self.booked_list = WebDriverWait(self.driver, 20).until(EC.presence_of_all_elements_located((By.XPATH, "//*[@id='myreservationslist']/table/tbody/tr")))[:-1]
         del self.booked_list[:2]
 
         for booked in self.booked_list: 
@@ -248,7 +248,7 @@ class Boka_Grupprum:
 
     def user_fully_booked(self):
         """Check if user has max amounts of rooms booked and either switches user or quits"""
-        self.booked_list = WebDriverWait(self.driver, 20).until(EC.presence_of_all_elements_located((By.XPATH, "//*[@id='myreservationslist']/table/tbody/tr")))
+        self.booked_list = WebDriverWait(self.driver, 20).until(EC.presence_of_all_elements_located((By.XPATH, "//*[@id='myreservationslist']/table/tbody/tr")))[:-1]
         del self.booked_list[:2]
 
         if len(self.booked_list) == 4:
