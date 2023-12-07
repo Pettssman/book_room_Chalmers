@@ -24,7 +24,7 @@ class Boka_Grupprum:
     It uses Selenium webdriver to interact with the website.
     """
 
-    def __init__(self, preferences: list(), schedule: dict(), users: list, decode: bool = False):
+    def __init__(self, preferences: list(), schedule: dict(), users: list, decode: bool):
         """
         Initialize the Boka_Grupprum class.
 
