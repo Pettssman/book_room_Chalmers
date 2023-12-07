@@ -14,4 +14,4 @@ schedule = {
 # Enter users as nested lists
 users = []
 
-Boka_Grupprum(preferences, schedule, users)
+Boka_Grupprum(preferences, schedule, users, decode=True)
