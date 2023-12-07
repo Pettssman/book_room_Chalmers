@@ -3,6 +3,8 @@ Script that books specified rooms at a wanted time given an user, e.g. room 1215
 
 This script needs your Chalmers login information to be used since to book a room, you need to be logged in. To not have your username and password in plain code, some security measurements have been implemented such that the passwords are encrypted with a key that is saved in windows credentials. Someone with enough knowledge could potentially get the key from the credential manager but it requires more work than if it was in plain text in the code.
 
+**NOTE:** If you don't care if you have your password explicitly written in a python file, the steps below are not necessary. Just write the password in the users variable in a string and specify decode=False when calling Boka_Grupprum(preferences, schedule, users, decode=False).
+
 # Step 1: Generate key
 
 Locate generate_password.py in helper directory. Enter your Chalmers password as a string to the variable password. Run the file and:
