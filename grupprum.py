@@ -15,9 +15,6 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
 from cryptography.fernet import Fernet
 
-# Decrypt password using pycreds and Fernet
-passw = pycreds.find_password("Fernet")
-fernet = Fernet(passw.encode('ASCII'))
 
 class Boka_Grupprum:
     """
@@ -27,7 +24,7 @@ class Boka_Grupprum:
     It uses Selenium webdriver to interact with the website.
     """
 
-    def __init__(self, preferences: list(), schedule: dict(), users: list):
+    def __init__(self, preferences: list(), schedule: dict(), users: list, decode: bool = False):
         """
         Initialize the Boka_Grupprum class.
 
@@ -35,9 +32,20 @@ class Boka_Grupprum:
         :param schedule: A dictionary that represents the weekly schedule.
         :param users: A list of users who can make bookings.
         """
+
+            
         self.preferences = preferences
         self.schedule = schedule
         self.users = users
+        self.decode = decode
+
+        # Decrypt password using pycreds and Fernet
+        if self.decode:
+            passw = pycreds.find_password("Fernet")
+            self.fernet = Fernet(passw.encode('ASCII'))
+        else:
+            ...
+
         self.booked_dict = {
             1:              # Week 1
                 {0:[],      # Monday
@@ -99,7 +107,12 @@ class Boka_Grupprum:
         self.driver.find_element(By.CSS_SELECTOR, ".items:nth-child(5)").click()
         self.driver.find_element(By.LINK_TEXT, "Klicka här för att logga in / Please click here to log in").click()
         self.driver.find_element(By.ID, "userNameInput").send_keys(user[0])
-        self.driver.find_element(By.ID, "passwordInput").send_keys(fernet.decrypt(user[1]).decode())
+        
+        if self.decode:
+            self.driver.find_element(By.ID, "passwordInput").send_keys(self.fernet.decrypt(user[1]).decode())
+        else:
+            self.driver.find_element(By.ID, "passwordInput").send_keys(user[1])
+
         self.driver.find_element(By.ID, "submitButton").click()
         self.driver.find_element(By.CSS_SELECTOR, "#contents > div:nth-child(2) > div:nth-child(7) > div.linklist > div:nth-child(3) > a:nth-child(2) > div > h2").click()
         self.driver.find_element(By.CSS_SELECTOR, "#ffsetx186 .objectinputsearchbutton").click()
