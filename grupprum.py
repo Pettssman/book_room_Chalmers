@@ -96,7 +96,7 @@ class Boka_Grupprum:
         self.alert = Alert(self.driver)
         # self.driver.set_window_position(-10000, 0)                  # Comment this line to show chrome window
         self.driver.get("https://cloud.timeedit.net/chalmers/web/")    
-        self.driver.find_element(By.CSS_SELECTOR, ".items:nth-child(4)").click()
+        self.driver.find_element(By.CSS_SELECTOR, ".items:nth-child(5)").click()
         self.driver.find_element(By.LINK_TEXT, "Klicka här för att logga in / Please click here to log in").click()
         self.driver.find_element(By.ID, "userNameInput").send_keys(user[0])
         self.driver.find_element(By.ID, "passwordInput").send_keys(fernet.decrypt(user[1]).decode())
